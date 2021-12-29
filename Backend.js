@@ -55,7 +55,7 @@ function start() {
 
 
   //Save instructions
-  for (var i = 1; i < document.getElementById("IQ").rows.length; i++) {
+  for (var i = 1; i < 11; i++) {
     if (
       document
         .getElementById("IQ")
@@ -79,7 +79,7 @@ function start() {
         writeRes: 0,
       };
 
-      instructionsQ = instructionsQ.push(newrow);
+      instructionsQ.push(newrow);
     }
 
     document
@@ -105,7 +105,7 @@ function start() {
   document.getElementsByName("MUL")[0].disabled = true;
   document.getElementsByName("DIV")[0].disabled = true;
 
-  console.log(executionTimes.SDet);
+  console.log(instructionsQ);
 }
 
 function next() {
