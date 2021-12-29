@@ -1,43 +1,43 @@
 var executionTimes;
 
-var instructionsQ = [];
+var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes}]
 var AddReserv = [];
 var MulReserv = [];
 var LDReserv = [];
 var SDReserv = [];
 var Registers = [
-  { name: "F0", Q: "", V: 0 },
-  { name: "F1", Q: "", V: 0 },
-  { name: "F2", Q: "", V: 0 },
-  { name: "F3", Q: "", V: 0 },
-  { name: "F4", Q: "", V: 0 },
-  { name: "F5", Q: "", V: 0 },
-  { name: "F6", Q: "", V: 0 },
-  { name: "F7", Q: "", V: 0 },
-  { name: "F8", Q: "", V: 0 },
-  { name: "F9", Q: "", V: 0 },
-  { name: "F10", Q: "", V: 0 },
-  { name: "F11", Q: "", V: 0 },
-  { name: "F12", Q: "", V: 0 },
-  { name: "F13", Q: "", V: 0 },
-  { name: "F14", Q: "", V: 0 },
-  { name: "F15", Q: "", V: 0 },
-  { name: "F16", Q: "", V: 0 },
-  { name: "F17", Q: "", V: 0 },
-  { name: "F18", Q: "", V: 0 },
-  { name: "F19", Q: "", V: 0 },
-  { name: "F20", Q: "", V: 0 },
-  { name: "F21", Q: "", V: 0 },
-  { name: "F22", Q: "", V: 0 },
-  { name: "F23", Q: "", V: 0 },
-  { name: "F24", Q: "", V: 0 },
-  { name: "F25", Q: "", V: 0 },
-  { name: "F26", Q: "", V: 0 },
-  { name: "F27", Q: "", V: 0 },
-  { name: "F28", Q: "", V: 0 },
-  { name: "F29", Q: "", V: 0 },
-  { name: "F30", Q: "", V: 0 },
-  { name: "F31", Q: "", V: 0 },
+  { name: "F0", Q: "", V: "" },
+  { name: "F1", Q: "", V: "" },
+  { name: "F2", Q: "", V: "" },
+  { name: "F3", Q: "", V: "" },
+  { name: "F4", Q: "", V: "" },
+  { name: "F5", Q: "", V: "" },
+  { name: "F6", Q: "", V: "" },
+  { name: "F7", Q: "", V: "" },
+  { name: "F8", Q: "", V: "" },
+  { name: "F9", Q: "", V: "" },
+  { name: "F10", Q: "", V: "" },
+  { name: "F11", Q: "", V: "" },
+  { name: "F12", Q: "", V: "" },
+  { name: "F13", Q: "", V: "" },
+  { name: "F14", Q: "", V: "" },
+  { name: "F15", Q: "", V: "" },
+  { name: "F16", Q: "", V: "" },
+  { name: "F17", Q: "", V: "" },
+  { name: "F18", Q: "", V: "" },
+  { name: "F19", Q: "", V: "" },
+  { name: "F20", Q: "", V: "" },
+  { name: "F21", Q: "", V: "" },
+  { name: "F22", Q: "", V: "" },
+  { name: "F23", Q: "", V: "" },
+  { name: "F24", Q: "", V: "" },
+  { name: "F25", Q: "", V: "" },
+  { name: "F26", Q: "", V: "" },
+  { name: "F27", Q: "", V: "" },
+  { name: "F28", Q: "", V: "" },
+  { name: "F29", Q: "", V: "" },
+  { name: "F30", Q: "", V: "" },
+  { name: "F31", Q: "", V: "" },
 ];
 var memory = [];
 
@@ -54,7 +54,7 @@ function start() {
   };
 
 
-  //Save instruction table
+  //Save instructions
   for (var i = 1; i < document.getElementById("IQ").rows.length; i++) {
     if (
       document
@@ -62,20 +62,20 @@ function start() {
         .rows[i].cells[0].getElementsByTagName("select")[0].value != "OP"
     ) {
       var newrow = {
-        OP: document
+        op: document
           .getElementById("IQ")
           .rows[i].cells[0].getElementsByTagName("select")[0].value,
         dest:  document
         .getElementById("IQ")
         .rows[i].cells[1].getElementsByTagName("input")[0].value,
-        R1:  document
+        r1:  document
         .getElementById("IQ")
         .rows[i].cells[2].getElementsByTagName("input")[0].value,
-        R2:  document
+        r2:  document
         .getElementById("IQ")
         .rows[i].cells[3].getElementsByTagName("input")[0].value,
-        Issue: 0,
-        Exec: 0,
+        issue: 0,
+        exec: 0,
         writeRes: 0,
       };
 
@@ -112,6 +112,38 @@ function next() {
   incrementClk();
 }
 
+function issue(){
+  //    if insturction available
+  if(instructionsQ.length > 0)
+  {
+    //If reservation station free (no structural hazard)
+    if(canIssue(instructionsQ[0].op)){
+     
+      //Issue instr & sends operands (renames registers).
+      //Send operands to reservation station if they are in registers
+      //If operands are not available in registers then keep track of Rs that will produce the operand (achieves renaming to avoid WAR and WAW)
+
+    } 
+  }
+}
+
+function canIssue(op){
+
+  switch(op){
+    case 'LD':
+      return (LDReserv.length != 3);
+    case 'SD':
+      return (SDReserv.length != 3);
+    case 'ADD':
+    case 'SUB':
+      return (AddReserv.length != 3);
+    case 'MUL':
+    case 'DIV':
+      return (MulReserv.length !=2);
+    
+  }
+}
+
 var clkCycle;
 function incrementClk() {
   clkCycle = parseInt(document.getElementById("getClkCycle").innerHTML, 10);
@@ -123,3 +155,8 @@ function incrementClk() {
 // var myTable = document.getElementById('IQ');
 // myTable.rows[1].cells[0].innerHTML = 'HIIII';
 // console.log(document.getElementById('IQ'));
+
+/*pop(): Remove an item from the end of an array.
+push(): Add items to the end of an array.
+shift(): Remove an item from the beginning of an array.
+unshift(): Add items to the beginning of an array.*/ 
