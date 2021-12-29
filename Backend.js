@@ -65,11 +65,15 @@ function start() {
         OP: document
           .getElementById("IQ")
           .rows[i].cells[0].getElementsByTagName("select")[0].value,
-        dest: ""+  document
+        dest:  document
         .getElementById("IQ")
-        .rows[i].cells[1].innerHTML,
-        R1: "",
-        R2: "",
+        .rows[i].cells[1].getElementsByTagName("input")[0].value,
+        R1:  document
+        .getElementById("IQ")
+        .rows[i].cells[2].getElementsByTagName("input")[0].value,
+        R2:  document
+        .getElementById("IQ")
+        .rows[i].cells[3].getElementsByTagName("input")[0].value,
         Issue: 0,
         Exec: 0,
         writeRes: 0,
@@ -85,6 +89,14 @@ function start() {
     document
     .getElementById("IQ")
     .rows[i].cells[1].getElementsByTagName("input")[0].disabled=true;
+
+    document
+    .getElementById("IQ")
+    .rows[i].cells[2].getElementsByTagName("input")[0].disabled=true;
+
+    document
+    .getElementById("IQ")
+    .rows[i].cells[3].getElementsByTagName("input")[0].disabled=true;
   }
 
   document.getElementsByName("LD")[0].disabled = true;
