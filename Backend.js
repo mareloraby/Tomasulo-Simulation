@@ -1,5 +1,3 @@
-
-
 var executionTimes;
 var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes}]
 var AddReserv = [
@@ -11,8 +9,16 @@ var MulReserv = [
   { tag: "M1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
   { tag: "M2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
 ]; //[{tag,oper,Vj,Vk,Qj,Qk,Busy}]
-var LDReserv = [];
-var SDReserv = [];
+var LDReserv = [
+  { tag: "L1", Address: "", Busy: 0 },
+  { tag: "L2", Address: "", Busy: 0 },
+  { tag: "L3", Address: "", Busy: 0 },
+];
+var SDReserv = [
+  { tag: "S1", Address: "", V: "", Q: "", Busy: 0 },
+  { tag: "S2", Address: "", V: "", Q: "", Busy: 0 },
+  { tag: "S3", Address: "", V: "", Q: "", Busy: 0 },
+];
 var Registers = [
   { name: "F0", Q: "", V: "" },
   { name: "F1", Q: "", V: "" },
@@ -124,7 +130,6 @@ function issue() {
   if (instructionsQ.length > 0) {
     //If reservation station free (no structural hazard)
     if (canIssue(instructionsQ[0].op)) {
-
       //Issue instr & sends operands (renames registers).
       //Send operands to reservation station if they are in registers
       //If operands are not available in registers then keep track of Rs that will produce the operand (achieves renaming to avoid WAR and WAW)
