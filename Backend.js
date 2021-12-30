@@ -159,12 +159,14 @@ function issue() {
           SDReserv[x].Busy = 1;
           SDReserv[x].Address = instructionsQ[current].r1;
           if (availableRegister(instructionsQ[current].dest)) {
-            var r = parseInt(instructionsQ[current].dest.substring(1), 10) + 1;
+            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+            console.log("line 163 r " + r);
             SDReserv[x].V = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].dest.substring(1), 10) + 1;
+            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
             SDReserv[x].Q = Registers[r].Q;
           }
+          console.log(Registers);
           break;
         //  ADD R5, R3, R4
         //[{op,dest,r1,r2,issue,exec,writeRes,time}]
@@ -175,24 +177,22 @@ function issue() {
           var x = AddReservAvailable(); // 0
           AddReserv[x].Busy = 1;
           AddReserv[x].oper = instructionsQ[current].op;
-          // var r = parseInt(instructionsQ[current].r1.substring(1), 10);
-          // if (Registers[r].V === "") return true;
+
+          var r = parseInt(instructionsQ[current].r1.substring(1), 10);
           if (availableRegister(instructionsQ[current].r1)) {
-            //R3
-            var r = parseInt(instructionsQ[current].r1.substring(1), 10) + 1; // 3
             AddReserv[x].Vj = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].r1.substring(1), 10) + 1;
             AddReserv[x].Qj = Registers[r].Q;
           }
+          r = parseInt(instructionsQ[current].r2.substring(1), 10);
           if (availableRegister(instructionsQ[current].r2)) {
-            //R4
-            var r = parseInt(instructionsQ[current].r2.substring(1), 10) + 1; // 4
             AddReserv[x].Vk = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].r2.substring(1), 10) + 1;
             AddReserv[x].Qk = Registers[r].Q;
           }
+          r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          Registers[r].Q = AddReserv[x].tag;
+          Registers[r].V = "";
           break;
         //MUL R3, R1, R2
         //[{op,dest,r1,r2,issue,exec,writeRes,time}]
@@ -203,22 +203,24 @@ function issue() {
           console.log("x " + x);
           MulReserv[x].Busy = 1;
           MulReserv[x].oper = instructionsQ[current].op;
+          var r = parseInt(instructionsQ[current].r1.substring(1), 10);
           if (availableRegister(instructionsQ[current].r1)) {
-            var r = parseInt(instructionsQ[current].r1.substring(1), 10) + 1;
             MulReserv[x].Vj = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].r1.substring(1), 10) + 1;
             MulReserv[x].Qj = Registers[r].Q;
           }
+          r = parseInt(instructionsQ[current].r2.substring(1), 10);
           if (availableRegister(instructionsQ[current].r2)) {
-            var r = parseInt(instructionsQ[current].r2.substring(1), 10) + 1;
             MulReserv[x].Vk = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].r2.substring(1), 10) + 1;
             MulReserv[x].Qk = Registers[r].Q;
           }
+          r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          Registers[r].Q = MulReserv[x].tag;
+          Registers[r].V = "";
           break;
       }
+      current++;
     }
   }
 }
@@ -260,8 +262,8 @@ function SDReservAvailable() {
 }
 
 function availableRegister(register) {
-  var r = parseInt(register.substring(1), 10) + 1;
-  if (Registers[r].Q === "") return true;
+  var r = parseInt(register.substring(1), 10);
+  if (Registers[r].V !== "") return true;
   return false;
 }
 
