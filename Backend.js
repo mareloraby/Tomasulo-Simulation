@@ -6,7 +6,7 @@ var regFile_front = document.getElementById("RF");
 var IQ_front = document.getElementById("IQ");
 var executionTimes;
 var current = 0;
-var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes,time}]
+var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes,time,reserIndex}]
 var AddReserv = [
   { tag: "A1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
   { tag: "A2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
@@ -98,6 +98,8 @@ function start() {
         exec: 0,
         writeRes: 0,
         time: 0,
+        reserIndex: -1,
+        result: "",
       };
 
       instructionsQ.push(newrow);
@@ -134,6 +136,7 @@ function start() {
 function next() {
   incrementClk();
   issue();
+  excute();
   reflectOnFront();
 }
 //MUL R3, R1, R2
@@ -152,6 +155,7 @@ function issue() {
           var x = LDReservAvailable();
           LDReserv[x].Busy = 1;
           LDReserv.Address = instructionsQ[current].r1;
+          instructionsQ[current].reserIndex = x;
           break;
         case "SD":
           instructionsQ[current].issue = clkCycle;
@@ -167,6 +171,7 @@ function issue() {
             SDReserv[x].Q = Registers[r].Q;
           }
           console.log(Registers);
+          instructionsQ[current].reserIndex = x;
           break;
         //  ADD R5, R3, R4
         //[{op,dest,r1,r2,issue,exec,writeRes,time}]
@@ -193,6 +198,7 @@ function issue() {
           r = parseInt(instructionsQ[current].dest.substring(1), 10);
           Registers[r].Q = AddReserv[x].tag;
           Registers[r].V = "";
+          instructionsQ[current].reserIndex = x;
           break;
         //MUL R3, R1, R2
         //[{op,dest,r1,r2,issue,exec,writeRes,time}]
@@ -218,12 +224,59 @@ function issue() {
           r = parseInt(instructionsQ[current].dest.substring(1), 10);
           Registers[r].Q = MulReserv[x].tag;
           Registers[r].V = "";
+          instructionsQ[current].reserIndex = x;
           break;
       }
       current++;
     }
   }
 }
+// Mul F0 F1 F2
+// Add F3 F0 F2
+function execute() {
+  for (var i = 0; i < current; i++) {
+    var index = instructionsQ[i].reserIndex;
+    if (instructionsQ[i].time === clkCycle)
+      instructionsQ[i].exec += " : " + clkCycle;
+    switch (instructionsQ[i].op) {
+      case "LD":
+        return LDReservAvailable();
+      case "SD":
+        return SDReservAvailable();
+      case "ADD":
+        if (
+          AddReserv[index].Vj !== "" &&
+          AddReserv[index].Vk !== "" &&
+          instructionsQ[i].exec === ""
+        ) {
+          instructionsQ[i].exec = clkCycle;
+          instructionsQ[i].time = clkCycle + executionTimes[2] - 1;
+          instructionsQ[i].result =
+            parseInt(AddReserv[index].Vj + "", 10) +
+            parseInt(AddReserv[index].Vk + "", 10);
+        }
+
+        break;
+      case "SUB":
+      case "MUL":
+      case "DIV":
+        return MulReservAvailable();
+    }
+  }
+}
+
+// in the write back cycle:
+// 1- remove from reser table
+// 2- write back to register file
+// 3- write back to tags in the reser tables
+// 4- update writeRes in the IQ
+// function writeResult(){
+//   for(var i=0; i<current; i++){
+//     if(instructionsQ[i].time+1 === clkCycle){
+
+//     }
+//   }
+// }
 
 function AddReservAvailable() {
   for (var i = 0; i < 3; i++) {
