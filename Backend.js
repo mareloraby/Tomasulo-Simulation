@@ -1,8 +1,16 @@
-var executionTimes;
 
+
+var executionTimes;
 var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes}]
-var AddReserv = [];
-var MulReserv = [];
+var AddReserv = [
+  { tag: "A1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+  { tag: "A2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+  { tag: "A3", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+]; //[{tag,oper,Vj,Vk,Qj,Qk,Busy}]
+var MulReserv = [
+  { tag: "M1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+  { tag: "M2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+]; //[{tag,oper,Vj,Vk,Qj,Qk,Busy}]
 var LDReserv = [];
 var SDReserv = [];
 var Registers = [
@@ -53,27 +61,26 @@ function start() {
     DIVet: document.getElementsByName("DIV")[0].value,
   };
 
-
   //Save instructions
   for (var i = 1; i < 11; i++) {
     if (
       document
         .getElementById("IQ")
-        .rows[i].cells[0].getElementsByTagName("select")[0].value != "OP"
+        .rows[i].cells[0].getElementsByTagName("select")[0].value !== "OP"
     ) {
       var newrow = {
         op: document
           .getElementById("IQ")
           .rows[i].cells[0].getElementsByTagName("select")[0].value,
-        dest:  document
-        .getElementById("IQ")
-        .rows[i].cells[1].getElementsByTagName("input")[0].value,
-        r1:  document
-        .getElementById("IQ")
-        .rows[i].cells[2].getElementsByTagName("input")[0].value,
-        r2:  document
-        .getElementById("IQ")
-        .rows[i].cells[3].getElementsByTagName("input")[0].value,
+        dest: document
+          .getElementById("IQ")
+          .rows[i].cells[1].getElementsByTagName("input")[0].value,
+        r1: document
+          .getElementById("IQ")
+          .rows[i].cells[2].getElementsByTagName("input")[0].value,
+        r2: document
+          .getElementById("IQ")
+          .rows[i].cells[3].getElementsByTagName("input")[0].value,
         issue: 0,
         exec: 0,
         writeRes: 0,
@@ -83,20 +90,20 @@ function start() {
     }
 
     document
-    .getElementById("IQ")
-    .rows[i].cells[0].getElementsByTagName("select")[0].disabled=true;
+      .getElementById("IQ")
+      .rows[i].cells[0].getElementsByTagName("select")[0].disabled = true;
 
     document
-    .getElementById("IQ")
-    .rows[i].cells[1].getElementsByTagName("input")[0].disabled=true;
+      .getElementById("IQ")
+      .rows[i].cells[1].getElementsByTagName("input")[0].disabled = true;
 
     document
-    .getElementById("IQ")
-    .rows[i].cells[2].getElementsByTagName("input")[0].disabled=true;
+      .getElementById("IQ")
+      .rows[i].cells[2].getElementsByTagName("input")[0].disabled = true;
 
     document
-    .getElementById("IQ")
-    .rows[i].cells[3].getElementsByTagName("input")[0].disabled=true;
+      .getElementById("IQ")
+      .rows[i].cells[3].getElementsByTagName("input")[0].disabled = true;
   }
 
   document.getElementsByName("LD")[0].disabled = true;
@@ -112,35 +119,31 @@ function next() {
   incrementClk();
 }
 
-function issue(){
+function issue() {
   //    if insturction available
-  if(instructionsQ.length > 0)
-  {
+  if (instructionsQ.length > 0) {
     //If reservation station free (no structural hazard)
-    if(canIssue(instructionsQ[0].op)){
-     
+    if (canIssue(instructionsQ[0].op)) {
+
       //Issue instr & sends operands (renames registers).
       //Send operands to reservation station if they are in registers
       //If operands are not available in registers then keep track of Rs that will produce the operand (achieves renaming to avoid WAR and WAW)
-
-    } 
+    }
   }
 }
 
-function canIssue(op){
-
-  switch(op){
-    case 'LD':
-      return (LDReserv.length != 3);
-    case 'SD':
-      return (SDReserv.length != 3);
-    case 'ADD':
-    case 'SUB':
-      return (AddReserv.length != 3);
-    case 'MUL':
-    case 'DIV':
-      return (MulReserv.length !=2);
-    
+function canIssue(op) {
+  switch (op) {
+    case "LD":
+      return LDReserv.length != 3;
+    case "SD":
+      return SDReserv.length != 3;
+    case "ADD":
+    case "SUB":
+      return AddReserv.length != 3;
+    case "MUL":
+    case "DIV":
+      return MulReserv.length != 2;
   }
 }
 
@@ -159,4 +162,4 @@ function incrementClk() {
 /*pop(): Remove an item from the end of an array.
 push(): Add items to the end of an array.
 shift(): Remove an item from the beginning of an array.
-unshift(): Add items to the beginning of an array.*/ 
+unshift(): Add items to the beginning of an array.*/
