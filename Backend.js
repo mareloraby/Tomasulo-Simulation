@@ -60,7 +60,7 @@ var Registers = [
   { name: "F30", Q: "", V: "" },
   { name: "F31", Q: "", V: "" },
 ];
-var memory = [];
+var memory = [64];
 
 function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
