@@ -63,6 +63,9 @@ var Registers = [
 var memory =[
   0,0,0,0,0,0,0,0,53,0,0,0,0,67,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
+  memory[32] = 100;
+  memory[44] = 200;
+  
 console.log("Cache: ");
 console.log( memory);
 
@@ -266,7 +269,7 @@ function execute() {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
               parseInt(clkCycle) + parseInt(executionTimes.SDet) - 1;
-            memory[SDReserv[index].Address] = SDReserv[index].V;
+            memory[SDReserv[index].Address] = parseInt(SDReserv[index].V,10);
             console.log(memory);
           }
           break;
@@ -329,6 +332,7 @@ function execute() {
           }
           break;
       }
+
     }
   }
 }
