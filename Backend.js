@@ -272,6 +272,20 @@ function execute() {
           }
           break;
         case "SUB":
+          if (
+            AddReserv[index].Vj != "" &&
+            AddReserv[index].Vk != "" &&
+            instructionsQ[i].exec == 0
+          ) {
+            instructionsQ[i].exec = clkCycle;
+
+            instructionsQ[i].time =
+              parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+            instructionsQ[i].result =
+              parseInt(AddReserv[index].Vj + "", 10) -
+              parseInt(AddReserv[index].Vk + "", 10);
+          }
+          break;
         case "MUL":
           if (
             MulReserv[index].Vj != "" &&
