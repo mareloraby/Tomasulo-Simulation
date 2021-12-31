@@ -60,7 +60,7 @@ var Registers = [
   { name: "F30", Q: "", V: "" },
   { name: "F31", Q: "", V: "" },
 ];
-var memory = [];
+var memory = [64];
 
 function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
@@ -200,9 +200,9 @@ function issue() {
           } else {
             AddReserv[x].Qk = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].dest.substring(1), 10);
-          Registers[r].Q = AddReserv[x].tag;
-          Registers[r].V = "";
+          r = parseInt(instructionsQ[current].dest.substring(1), 10); //which index
+          Registers[r].Q = AddReserv[x].tag; //access register -> .Q empty string
+          Registers[r].V = ""; // & .V value of memory
           instructionsQ[current].reserIndex = x;
           break;
         //MUL R3, R1, R2
@@ -246,6 +246,13 @@ function execute() {
         instructionsQ[i].exec += " : " + clkCycle;
       switch (instructionsQ[i].op) {
         case "LD":
+          if(instructionsQ[i].exec == 0){
+            instructionsQ[i].exec = clkCycle;
+            instructionsQ.time = parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+            Registers[r].V = memory[instructionsQ[current].r1];
+            Registers[r].Q = "";
+          }
           return LDReservAvailable();
         case "SD":
           return SDReservAvailable();
