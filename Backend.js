@@ -249,11 +249,9 @@ function execute() {
           if(instructionsQ[i].exec == 0){
             instructionsQ[i].exec = clkCycle;
             instructionsQ.time = parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
-            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
-            Registers[r].V = memory[instructionsQ[current].r1];
-            Registers[r].Q = "";
+            instructionsQ[i].result = memory[instructionsQ[i].r1];
           }
-          return LDReservAvailable();
+          break;
         case "SD":
           return SDReservAvailable();
         case "ADD":
@@ -307,7 +305,15 @@ function writeResult() {
       var index = instructionsQ[i].reserIndex;
       switch (instructionsQ[i].op) {
         case "LD":
-          return LDReservAvailable();
+          var tag = LDReserv[index].tag;
+          searchReservationTables(tag, instructionsQ[i].result);
+          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          Registers[r].Q = "";
+          Registers[r].V = instructionsQ[i].result;
+          LDReserv[index].Busy = 0;
+          LDReserv[index].Address = "";
+          instructionsQ[i].writeRes = clkCycle;
+          break;
         case "SD":
           return SDReservAvailable();
         case "ADD":
