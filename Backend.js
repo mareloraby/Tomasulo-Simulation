@@ -97,9 +97,10 @@ function start() {
         issue: 0,
         exec: 0,
         writeRes: 0,
-        time: 0,
+        time: -8,
         reserIndex: -1,
         result: "",
+        state: 0,
       };
 
       instructionsQ.push(newrow);
@@ -136,7 +137,8 @@ function start() {
 function next() {
   incrementClk();
   issue();
-  excute();
+  execute();
+  writeResult();
   reflectOnFront();
 }
 //MUL R3, R1, R2
@@ -144,7 +146,10 @@ function issue() {
   //    if insturction available
   if (instructionsQ.length > 0) {
     //If reservation station free (no structural hazard)
-    if (canIssue(instructionsQ[current].op) != -1) {
+    if (
+      current < instructionsQ.length &&
+      canIssue(instructionsQ[current].op) != -1
+    ) {
       //[{op,dest,r1,r2,issue,exec,writeRes}]
       //Issue instr & sends operands (renames registers).
       //Send operands to reservation station if they are in registers
@@ -235,48 +240,133 @@ function issue() {
 // Add F3 F0 F2
 function execute() {
   for (var i = 0; i < current; i++) {
-    var index = instructionsQ[i].reserIndex;
-    if (instructionsQ[i].time === clkCycle)
-      instructionsQ[i].exec += " : " + clkCycle;
-    switch (instructionsQ[i].op) {
-      case "LD":
-        return LDReservAvailable();
-      case "SD":
-        return SDReservAvailable();
-      case "ADD":
-        if (
-          AddReserv[index].Vj !== "" &&
-          AddReserv[index].Vk !== "" &&
-          instructionsQ[i].exec === ""
-        ) {
-          instructionsQ[i].exec = clkCycle;
-          instructionsQ[i].time = clkCycle + executionTimes[2] - 1;
-          instructionsQ[i].result =
-            parseInt(AddReserv[index].Vj + "", 10) +
-            parseInt(AddReserv[index].Vk + "", 10);
-        }
+    if (parseInt(instructionsQ[i].issue) != parseInt(clkCycle)) {
+      var index = instructionsQ[i].reserIndex;
+      if (parseInt(instructionsQ[i].time) == clkCycle)
+        instructionsQ[i].exec += " : " + clkCycle;
+      switch (instructionsQ[i].op) {
+        case "LD":
+          return LDReservAvailable();
+        case "SD":
+          return SDReservAvailable();
+        case "ADD":
+          if (
+            AddReserv[index].Vj != "" &&
+            AddReserv[index].Vk != "" &&
+            instructionsQ[i].exec == ""
+          ) {
+            instructionsQ[i].exec = clkCycle;
 
-        break;
-      case "SUB":
-      case "MUL":
-      case "DIV":
-        return MulReservAvailable();
+            instructionsQ[i].time =
+              parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+            instructionsQ[i].result =
+              parseInt(AddReserv[index].Vj + "", 10) +
+              parseInt(AddReserv[index].Vk + "", 10);
+          }
+          break;
+        case "SUB":
+        case "MUL":
+          if (
+            MulReserv[index].Vj != "" &&
+            MulReserv[index].Vk != "" &&
+            instructionsQ[i].exec == ""
+          ) {
+            instructionsQ[i].exec = clkCycle;
+
+            instructionsQ[i].time =
+              parseInt(clkCycle) + parseInt(executionTimes.MULet) - 1;
+            instructionsQ[i].result =
+              parseInt(MulReserv[index].Vj + "", 10) *
+              parseInt(MulReserv[index].Vk + "", 10);
+          }
+          break;
+        case "DIV":
+          return MulReservAvailable();
+      }
     }
   }
 }
 
+//[{op,dest,r1,r2,issue,exec,writeRes,time,reserIndex,result}]
 // in the write back cycle:
-// 1- remove from reser table
-// 2- write back to register file
-// 3- write back to tags in the reser tables
-// 4- update writeRes in the IQ
-// function writeResult(){
-//   for(var i=0; i<current; i++){
-//     if(instructionsQ[i].time+1 === clkCycle){
+// 1- remove from reser table //
+// 2- write back to register file //
+// 3- write back to tags in the reser tables //
+// 4- update writeRes in the IQ //
 
-//     }
-//   }
-// }
+function writeResult() {
+  for (var i = 0; i < current; i++) {
+    if (instructionsQ[i].time + 1 === clkCycle) {
+      var index = instructionsQ[i].reserIndex;
+      switch (instructionsQ[i].op) {
+        case "LD":
+          return LDReservAvailable();
+        case "SD":
+          return SDReservAvailable();
+        case "ADD":
+        case "SUB":
+          var tag = AddReserv[index].tag;
+          searchReservationTables(tag, instructionsQ[i].result);
+          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          Registers[r].Q = "";
+          Registers[r].V = instructionsQ[i].result;
+          AddReserv[index].Vj = "";
+          AddReserv[index].Vk = "";
+          AddReserv[index].Qj = "";
+          AddReserv[index].Qk = "";
+          AddReserv[index].oper = "";
+          AddReserv[index].Busy = 0;
+          instructionsQ[i].writeRes = clkCycle;
+          break;
+        case "MUL":
+        case "DIV":
+          var tag = MulReserv[index].tag;
+          searchReservationTables(tag, instructionsQ[i].result);
+          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          Registers[r].Q = "";
+          Registers[r].V = instructionsQ[i].result;
+          MulReserv[index].Vj = "";
+          MulReserv[index].Vk = "";
+          MulReserv[index].Qj = "";
+          MulReserv[index].Qk = "";
+          MulReserv[index].oper = "";
+          MulReserv[index].Busy = 0;
+          instructionsQ[i].writeRes = clkCycle;
+          break;
+      }
+      // the first inst issued will be executed :)
+    }
+  }
+}
+
+function searchReservationTables(tag, result) {
+  for (var i = 0; i < 3; i++) {
+    if (AddReserv[i].Qj === tag) {
+      AddReserv[i].Qj = "";
+      AddReserv[i].Vj = result;
+    }
+    if (AddReserv[i].Qk === tag) {
+      AddReserv[i].Qk = "";
+      AddReserv[i].Vk = result;
+    }
+  }
+  for (var i = 0; i < 2; i++) {
+    if (MulReserv[i].Qj === tag) {
+      MulReserv[i].Qj = "";
+      MulReserv[i].Vj = result;
+    }
+    if (MulReserv[i].Qk === tag) {
+      MulReserv[i].Qk = "";
+      MulReserv[i].Vk = result;
+    }
+  }
+  for (var i = 0; i < 3; i++) {
+    if (SDReserv[i].Q === tag) {
+      SDReserv[i].Q = "";
+      SDReserv[i].V = result;
+    }
+  }
+}
 
 function AddReservAvailable() {
   for (var i = 0; i < 3; i++) {
