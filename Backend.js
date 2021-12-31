@@ -62,9 +62,9 @@ var Registers = [
 ];
 var memory =[
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-  
+
   for(i=0; i< memory.length;i++){
-    memory[i] = Math.floor(Math.random() * 101);
+    memory[i] = Math.floor(Math.random() * 1000);
   }
   
 console.log("Cache: ");
