@@ -200,9 +200,9 @@ function issue() {
           } else {
             AddReserv[x].Qk = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].dest.substring(1), 10); //which index
-          Registers[r].Q = AddReserv[x].tag; //access register -> .Q empty string
-          Registers[r].V = ""; // & .V value of memory
+          r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          Registers[r].Q = AddReserv[x].tag;
+          Registers[r].V = "";
           instructionsQ[current].reserIndex = x;
           break;
         //MUL R3, R1, R2
