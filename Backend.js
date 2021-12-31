@@ -63,7 +63,8 @@ var Registers = [
 var memory =[
   0,0,0,0,0,0,0,0,53,0,0,0,0,67,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
-console.log(memory);
+console.log("Cache: ");
+console.log( memory);
 
 function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
@@ -164,6 +165,11 @@ function issue() {
           LDReserv[x].Busy = 1;
           LDReserv[x].Address = instructionsQ[current].r1;
           instructionsQ[current].reserIndex = x;
+
+          var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          Registers[r].Q = LDReserv[x].tag; 
+          Registers[r].V = "";
+
           break;
         case "SD":
           instructionsQ[current].issue = clkCycle;
