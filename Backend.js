@@ -60,7 +60,10 @@ var Registers = [
   { name: "F30", Q: "", V: "" },
   { name: "F31", Q: "", V: "" },
 ];
-var memory = [64];
+var memory =[
+  0,0,0,0,0,0,0,0,53,0,0,0,0,67,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+console.log(memory);
 
 function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
@@ -159,7 +162,7 @@ function issue() {
           instructionsQ[current].issue = clkCycle;
           var x = LDReservAvailable();
           LDReserv[x].Busy = 1;
-          LDReserv.Address = instructionsQ[current].r1;
+          LDReserv[x].Address = instructionsQ[current].r1;
           instructionsQ[current].reserIndex = x;
           break;
         case "SD":
@@ -248,7 +251,7 @@ function execute() {
         case "LD":
           if(instructionsQ[i].exec == 0){
             instructionsQ[i].exec = clkCycle;
-            instructionsQ.time = parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+            instructionsQ[i].time = parseInt(clkCycle) + parseInt(executionTimes.LDet) - 1;
             instructionsQ[i].result = memory[instructionsQ[i].r1];
           }
           break;
@@ -256,7 +259,7 @@ function execute() {
           if (SDReserv[index].V != "" && instructionsQ[i].exec == 0) {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+              parseInt(clkCycle) + parseInt(executionTimes.SDet) - 1;
             memory[SDReserv[index].Address] = SDReserv[index].V;
             console.log(memory);
           }
