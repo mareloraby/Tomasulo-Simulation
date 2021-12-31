@@ -200,9 +200,9 @@ function issue() {
           } else {
             AddReserv[x].Qk = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].dest.substring(1), 10);
-          Registers[r].Q = AddReserv[x].tag;
-          Registers[r].V = "";
+          r = parseInt(instructionsQ[current].dest.substring(1), 10); //which index
+          Registers[r].Q = AddReserv[x].tag; //access register -> .Q empty string
+          Registers[r].V = ""; // & .V value of memory
           instructionsQ[current].reserIndex = x;
           break;
         //MUL R3, R1, R2
@@ -246,7 +246,12 @@ function execute() {
         instructionsQ[i].exec += " : " + clkCycle;
       switch (instructionsQ[i].op) {
         case "LD":
-          return LDReservAvailable();
+          if(instructionsQ[i].exec == 0){
+            instructionsQ[i].exec = clkCycle;
+            instructionsQ.time = parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+            instructionsQ[i].result = memory[instructionsQ[i].r1];
+          }
+          break;
         case "SD":
           if (SDReserv[index].V != "" && instructionsQ[i].exec == 0) {
             instructionsQ[i].exec = clkCycle;
@@ -332,7 +337,15 @@ function writeResult() {
       var index = instructionsQ[i].reserIndex;
       switch (instructionsQ[i].op) {
         case "LD":
-          return LDReservAvailable();
+          var tag = LDReserv[index].tag;
+          searchReservationTables(tag, instructionsQ[i].result);
+          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          Registers[r].Q = "";
+          Registers[r].V = instructionsQ[i].result;
+          LDReserv[index].Busy = 0;
+          LDReserv[index].Address = "";
+          instructionsQ[i].writeRes = clkCycle;
+          break;
         case "SD":
           SDReserv[index].V = "";
           SDReserv[index].Q = "";
