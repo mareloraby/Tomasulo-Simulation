@@ -60,21 +60,22 @@ var Registers = [
   { name: "F30", Q: "", V: "30" },
   { name: "F31", Q: "", V: "31" },
 ];
-var memory =[
-  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-
-
-console.log("Cache: ");
-console.log( memory);
+var memory = [
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+];
 
 function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
   document.getElementById("nextBtn").style.visibility = "visible";
 
-  for(i=0; i< memory.length;i++){
+  for (i = 0; i < memory.length; i++) {
     memory[i] = Math.floor(Math.random() * 101);
   }
-  
+  console.log("Cache: ");
+  console.log(memory);
+
   executionTimes = {
     LDet: document.getElementsByName("LD")[0].value,
     SDet: document.getElementsByName("SD")[0].value,
@@ -172,7 +173,7 @@ function issue() {
           instructionsQ[current].reserIndex = x;
 
           var r = parseInt(instructionsQ[current].dest.substring(1), 10);
-          Registers[r].Q = LDReserv[x].tag; 
+          Registers[r].Q = LDReserv[x].tag;
           Registers[r].V = "";
 
           break;
@@ -260,9 +261,10 @@ function execute() {
         instructionsQ[i].exec += " : " + clkCycle;
       switch (instructionsQ[i].op) {
         case "LD":
-          if(instructionsQ[i].exec == 0){
+          if (instructionsQ[i].exec == 0) {
             instructionsQ[i].exec = clkCycle;
-            instructionsQ[i].time = parseInt(clkCycle) + parseInt(executionTimes.LDet) - 1;
+            instructionsQ[i].time =
+              parseInt(clkCycle) + parseInt(executionTimes.LDet) - 1;
             instructionsQ[i].result = memory[instructionsQ[i].r1];
           }
           break;
@@ -271,7 +273,7 @@ function execute() {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
               parseInt(clkCycle) + parseInt(executionTimes.SDet) - 1;
-            memory[SDReserv[index].Address] = parseInt(SDReserv[index].V,10);
+            memory[SDReserv[index].Address] = parseInt(SDReserv[index].V, 10);
             console.log(memory);
           }
           break;
@@ -330,11 +332,11 @@ function execute() {
             instructionsQ[i].time =
               parseInt(clkCycle) + parseInt(executionTimes.DIVet) - 1;
             instructionsQ[i].result =
-              parseInt(AddReserv[index].Vj + "", 10) / parseInt(AddReserv[index].Vk + "", 10);
+              parseInt(AddReserv[index].Vj + "", 10) /
+              parseInt(AddReserv[index].Vk + "", 10);
           }
           break;
       }
-
     }
   }
 }
