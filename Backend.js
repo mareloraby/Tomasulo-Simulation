@@ -63,10 +63,7 @@ var Registers = [
 var memory =[
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 
-  for(i=0; i< memory.length;i++){
-    memory[i] = Math.floor(Math.random() * 101);
-  }
-  
+
 console.log("Cache: ");
 console.log( memory);
 
@@ -74,6 +71,10 @@ function start() {
   document.getElementById("startBtn").style.visibility = "hidden";
   document.getElementById("nextBtn").style.visibility = "visible";
 
+  for(i=0; i< memory.length;i++){
+    memory[i] = Math.floor(Math.random() * 101);
+  }
+  
   executionTimes = {
     LDet: document.getElementsByName("LD")[0].value,
     SDet: document.getElementsByName("SD")[0].value,
