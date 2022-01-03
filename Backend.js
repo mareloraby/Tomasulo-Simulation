@@ -8,16 +8,15 @@ var executionTimes;
 var current = 0;
 var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes,time,reserIndex}]
 
-const AddReservSize = 2;
+const AddReservSize = 3;
 const MulReservSize = 2;
 const LDReservSize = 2;
 const SDReservSize = 2;
 
-
 var AddReserv = [
   { tag: "A1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
   { tag: "A2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
-  // { tag: "A3", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+  { tag: "A3", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
 ]; //[{tag,oper,Vj,Vk,Qj,Qk,Busy}]
 var MulReserv = [
   { tag: "M1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
@@ -54,7 +53,7 @@ var Registers = [
   { name: "F17", Q: "", V: "17" },
   { name: "F18", Q: "", V: "18" },
   { name: "F19", Q: "", V: "19" },
-  { name: "F20", Q: "", V: "1.99" },
+  { name: "F20", Q: "", V: "2" },
   { name: "F21", Q: "", V: "21" },
   { name: "F22", Q: "", V: "22" },
   { name: "F23", Q: "", V: "23" },
@@ -70,7 +69,7 @@ var Registers = [
 var memory = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 
 function start() {
@@ -118,6 +117,7 @@ function start() {
         reserIndex: -1,
         result: "",
         state: 0,
+        tag: "",
       };
 
       instructionsQ.push(newrow);
@@ -153,9 +153,11 @@ function start() {
 
 function next() {
   incrementClk();
+
   issue();
   execute();
   writeResult();
+
   reflectOnFront();
 }
 //MUL R3, R1, R2
@@ -178,6 +180,7 @@ function issue() {
           LDReserv[x].Busy = 1;
           LDReserv[x].Address = instructionsQ[current].r1;
           instructionsQ[current].reserIndex = x;
+          instructionsQ[current].tag = LDReserv[x].tag;
 
           var r = parseInt(instructionsQ[current].dest.substring(1), 10);
           Registers[r].Q = LDReserv[x].tag;
@@ -226,6 +229,8 @@ function issue() {
           Registers[r].Q = AddReserv[x].tag; //access register -> .Q empty string
           Registers[r].V = ""; // & .V value of memory
           instructionsQ[current].reserIndex = x;
+          instructionsQ[current].tag = AddReserv[x].tag;
+
           break;
         //MUL R3, R1, R2
         //[{op,dest,r1,r2,issue,exec,writeRes,time}]
@@ -363,8 +368,10 @@ function writeResult() {
           var tag = LDReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
           var r = parseInt(instructionsQ[i].dest.substring(1), 10);
-          Registers[r].Q = "";
-          Registers[r].V = instructionsQ[i].result;
+          if (Registers[r].Q == tag || Registers[r].Q == "") {
+            Registers[r].Q = "";
+            Registers[r].V = instructionsQ[i].result;
+          }
           LDReserv[index].Busy = 0;
           LDReserv[index].Address = "";
           instructionsQ[i].writeRes = clkCycle;
@@ -381,8 +388,10 @@ function writeResult() {
           var tag = AddReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
           var r = parseInt(instructionsQ[i].dest.substring(1), 10);
-          Registers[r].Q = "";
-          Registers[r].V = instructionsQ[i].result;
+          if (Registers[r].Q == tag || Registers[r].Q == "") {
+            Registers[r].Q = "";
+            Registers[r].V = instructionsQ[i].result;
+          }
           AddReserv[index].Vj = "";
           AddReserv[index].Vk = "";
           AddReserv[index].Qj = "";
@@ -396,8 +405,10 @@ function writeResult() {
           var tag = MulReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
           var r = parseInt(instructionsQ[i].dest.substring(1), 10);
-          Registers[r].Q = "";
-          Registers[r].V = instructionsQ[i].result;
+          if (Registers[r].Q == tag || Registers[r].Q == "") {
+            Registers[r].Q = "";
+            Registers[r].V = instructionsQ[i].result;
+          }
           MulReserv[index].Vj = "";
           MulReserv[index].Vk = "";
           MulReserv[index].Qj = "";
@@ -517,7 +528,7 @@ unshift(): Add items to the beginning of an array.*/
 
 function reflectOnFront() {
   // AddReserv
-  for (var i = 1; i < AddReservSize+1; i++) {
+  for (var i = 1; i < AddReservSize + 1; i++) {
     addReserv_front.rows[i].cells[1].innerHTML = AddReserv[i - 1].oper;
     addReserv_front.rows[i].cells[2].innerHTML = AddReserv[i - 1].Vj;
     addReserv_front.rows[i].cells[3].innerHTML = AddReserv[i - 1].Vk;
@@ -526,7 +537,7 @@ function reflectOnFront() {
     addReserv_front.rows[i].cells[6].innerHTML = AddReserv[i - 1].Busy;
   }
   // MuLReserv
-  for (var i = 1; i < MulReservSize+1; i++) {
+  for (var i = 1; i < MulReservSize + 1; i++) {
     mulReserv_front.rows[i].cells[1].innerHTML = MulReserv[i - 1].oper;
     mulReserv_front.rows[i].cells[2].innerHTML = MulReserv[i - 1].Vj;
     mulReserv_front.rows[i].cells[3].innerHTML = MulReserv[i - 1].Vk;
@@ -535,12 +546,12 @@ function reflectOnFront() {
     mulReserv_front.rows[i].cells[6].innerHTML = MulReserv[i - 1].Busy;
   }
   // SDReserv
-  for (var i = 1; i < SDReservSize+1; i++) {
+  for (var i = 1; i < SDReservSize + 1; i++) {
     LDReserv_front.rows[i].cells[1].innerHTML = LDReserv[i - 1].Address;
     LDReserv_front.rows[i].cells[2].innerHTML = LDReserv[i - 1].Busy;
   }
   // LDReserv
-  for (var i = 1; i < LDReservSize+1; i++) {
+  for (var i = 1; i < LDReservSize + 1; i++) {
     SDReserv_front.rows[i].cells[1].innerHTML = SDReserv[i - 1].Address;
     SDReserv_front.rows[i].cells[2].innerHTML = SDReserv[i - 1].V;
     SDReserv_front.rows[i].cells[3].innerHTML = SDReserv[i - 1].Q;
