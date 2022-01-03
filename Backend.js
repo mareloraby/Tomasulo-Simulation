@@ -336,19 +336,20 @@ function execute() {
           }
           break;
         case "DIV":
-          console.log("IM HERE");
           if (
-            AddReserv[index].Vj != "" &&
-            AddReserv[index].Vk != "" &&
+            MulReserv[index].Vj != "" &&
+            MulReserv[index].Vk != "" &&
             instructionsQ[i].exec == 0
           ) {
+           
+
             instructionsQ[i].exec = clkCycle;
+
 
             instructionsQ[i].time =
               parseFloat(clkCycle) + parseFloat(executionTimes.DIVet) - 1;
             instructionsQ[i].result =
-              parseFloat(AddReserv[index].Vj + "", 10) /
-              parseFloat(AddReserv[index].Vk + "", 10);
+              (parseFloat(MulReserv[index].Vj + "", 10) / parseFloat(MulReserv[index].Vk + "", 10));
           }
           break;
       }
@@ -412,7 +413,7 @@ function writeResult() {
           var r = parseFloat(instructionsQ[i].dest.substring(1), 10);
           if (Registers[r].Q == tag || Registers[r].Q == "") {
             Registers[r].Q = "";
-            Registers[r].V = instructionsQ[i].result;
+            Registers[r].V = parseFloat(instructionsQ[i].result).toFixed(2);
           }
           MulReserv[index].Vj = "";
           MulReserv[index].Vk = "";
