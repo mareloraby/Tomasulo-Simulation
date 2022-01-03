@@ -7,10 +7,17 @@ var IQ_front = document.getElementById("IQ");
 var executionTimes;
 var current = 0;
 var instructionsQ = []; //[{op,dest,r1,r2,issue,exec,writeRes,time,reserIndex}]
+
+const AddReservSize = 2;
+const MulReservSize = 2;
+const LDReservSize = 2;
+const SDReservSize = 2;
+
+
 var AddReserv = [
   { tag: "A1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
   { tag: "A2", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
-  { tag: "A3", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
+  // { tag: "A3", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
 ]; //[{tag,oper,Vj,Vk,Qj,Qk,Busy}]
 var MulReserv = [
   { tag: "M1", oper: "", Vj: "", Vk: "", Qj: "", Qk: "", Busy: 0 },
@@ -19,12 +26,12 @@ var MulReserv = [
 var LDReserv = [
   { tag: "L1", Address: "", Busy: 0 },
   { tag: "L2", Address: "", Busy: 0 },
-  { tag: "L3", Address: "", Busy: 0 },
+  // { tag: "L3", Address: "", Busy: 0 },
 ]; // [{tag,add,busy}]
 var SDReserv = [
   { tag: "S1", Address: "", V: "", Q: "", Busy: 0 },
   { tag: "S2", Address: "", V: "", Q: "", Busy: 0 },
-  { tag: "S3", Address: "", V: "", Q: "", Busy: 0 },
+  // { tag: "S3", Address: "", V: "", Q: "", Busy: 0 },
 ]; // [{tag,add,V,Q,Busy}]
 var Registers = [
   { name: "F0", Q: "", V: "0" },
@@ -47,7 +54,7 @@ var Registers = [
   { name: "F17", Q: "", V: "17" },
   { name: "F18", Q: "", V: "18" },
   { name: "F19", Q: "", V: "19" },
-  { name: "F20", Q: "", V: "20" },
+  { name: "F20", Q: "", V: "1.99" },
   { name: "F21", Q: "", V: "21" },
   { name: "F22", Q: "", V: "22" },
   { name: "F23", Q: "", V: "23" },
@@ -274,7 +281,6 @@ function execute() {
             instructionsQ[i].time =
               parseInt(clkCycle) + parseInt(executionTimes.SDet) - 1;
             memory[SDReserv[index].Address] = parseInt(SDReserv[index].V, 10);
-            console.log(memory);
           }
           break;
         case "ADD":
@@ -407,7 +413,7 @@ function writeResult() {
 }
 
 function searchReservationTables(tag, result) {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < AddReservSize; i++) {
     if (AddReserv[i].Qj === tag) {
       AddReserv[i].Qj = "";
       AddReserv[i].Vj = result;
@@ -417,7 +423,7 @@ function searchReservationTables(tag, result) {
       AddReserv[i].Vk = result;
     }
   }
-  for (var i = 0; i < 2; i++) {
+  for (var i = 0; i < MulReservSize; i++) {
     if (MulReserv[i].Qj === tag) {
       MulReserv[i].Qj = "";
       MulReserv[i].Vj = result;
@@ -427,7 +433,7 @@ function searchReservationTables(tag, result) {
       MulReserv[i].Vk = result;
     }
   }
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < SDReservSize; i++) {
     if (SDReserv[i].Q === tag) {
       SDReserv[i].Q = "";
       SDReserv[i].V = result;
@@ -436,7 +442,7 @@ function searchReservationTables(tag, result) {
 }
 
 function AddReservAvailable() {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < AddReservSize; i++) {
     if (AddReserv[i].Busy === 0) {
       return i;
     }
@@ -445,7 +451,7 @@ function AddReservAvailable() {
 }
 
 function MulReservAvailable() {
-  for (var i = 0; i < 2; i++) {
+  for (var i = 0; i < MulReservSize; i++) {
     if (MulReserv[i].Busy === 0) {
       return i;
     }
@@ -454,7 +460,7 @@ function MulReservAvailable() {
 }
 
 function LDReservAvailable() {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < LDReservSize; i++) {
     if (LDReserv[i].Busy === 0) {
       return i;
     }
@@ -463,7 +469,7 @@ function LDReservAvailable() {
 }
 
 function SDReservAvailable() {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < SDReservSize; i++) {
     if (SDReserv[i].Busy === 0) {
       return i;
     }
@@ -511,7 +517,7 @@ unshift(): Add items to the beginning of an array.*/
 
 function reflectOnFront() {
   // AddReserv
-  for (var i = 1; i < 4; i++) {
+  for (var i = 1; i < AddReservSize+1; i++) {
     addReserv_front.rows[i].cells[1].innerHTML = AddReserv[i - 1].oper;
     addReserv_front.rows[i].cells[2].innerHTML = AddReserv[i - 1].Vj;
     addReserv_front.rows[i].cells[3].innerHTML = AddReserv[i - 1].Vk;
@@ -520,7 +526,7 @@ function reflectOnFront() {
     addReserv_front.rows[i].cells[6].innerHTML = AddReserv[i - 1].Busy;
   }
   // MuLReserv
-  for (var i = 1; i < 3; i++) {
+  for (var i = 1; i < MulReservSize+1; i++) {
     mulReserv_front.rows[i].cells[1].innerHTML = MulReserv[i - 1].oper;
     mulReserv_front.rows[i].cells[2].innerHTML = MulReserv[i - 1].Vj;
     mulReserv_front.rows[i].cells[3].innerHTML = MulReserv[i - 1].Vk;
@@ -529,12 +535,12 @@ function reflectOnFront() {
     mulReserv_front.rows[i].cells[6].innerHTML = MulReserv[i - 1].Busy;
   }
   // SDReserv
-  for (var i = 1; i < 4; i++) {
+  for (var i = 1; i < SDReservSize+1; i++) {
     LDReserv_front.rows[i].cells[1].innerHTML = LDReserv[i - 1].Address;
     LDReserv_front.rows[i].cells[2].innerHTML = LDReserv[i - 1].Busy;
   }
   // LDReserv
-  for (var i = 1; i < 4; i++) {
+  for (var i = 1; i < LDReservSize+1; i++) {
     SDReserv_front.rows[i].cells[1].innerHTML = SDReserv[i - 1].Address;
     SDReserv_front.rows[i].cells[2].innerHTML = SDReserv[i - 1].V;
     SDReserv_front.rows[i].cells[3].innerHTML = SDReserv[i - 1].Q;
