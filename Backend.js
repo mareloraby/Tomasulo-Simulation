@@ -34,9 +34,9 @@ var SDReserv = [
 ]; // [{tag,add,V,Q,Busy}]
 var Registers = [
   { name: "F0", Q: "", V: "0" },
-  { name: "F1", Q: "", V: "1" },
-  { name: "F2", Q: "", V: "2" },
-  { name: "F3", Q: "", V: "3" },
+  { name: "F1", Q: "", V: "1.1" },
+  { name: "F2", Q: "", V: "2.78" },
+  { name: "F3", Q: "", V: "3.99" },
   { name: "F4", Q: "", V: "4" },
   { name: "F5", Q: "", V: "5" },
   { name: "F6", Q: "", V: "6" },
@@ -158,6 +158,7 @@ function next() {
   execute();
   writeResult();
 
+  console.log(memory);
   reflectOnFront();
 }
 //MUL R3, R1, R2
@@ -182,7 +183,7 @@ function issue() {
           instructionsQ[current].reserIndex = x;
           instructionsQ[current].tag = LDReserv[x].tag;
 
-          var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          var r = parseFloat(instructionsQ[current].dest.substring(1), 10);
           Registers[r].Q = LDReserv[x].tag;
           Registers[r].V = "";
 
@@ -193,11 +194,11 @@ function issue() {
           SDReserv[x].Busy = 1;
           SDReserv[x].Address = instructionsQ[current].r1;
           if (availableRegister(instructionsQ[current].dest)) {
-            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+            var r = parseFloat(instructionsQ[current].dest.substring(1), 10);
             console.log("line 163 r " + r);
             SDReserv[x].V = Registers[r].V;
           } else {
-            var r = parseInt(instructionsQ[current].dest.substring(1), 10);
+            var r = parseFloat(instructionsQ[current].dest.substring(1), 10);
             SDReserv[x].Q = Registers[r].Q;
           }
           console.log(Registers);
@@ -213,19 +214,19 @@ function issue() {
           AddReserv[x].Busy = 1;
           AddReserv[x].oper = instructionsQ[current].op;
 
-          var r = parseInt(instructionsQ[current].r1.substring(1), 10);
+          var r = parseFloat(instructionsQ[current].r1.substring(1), 10);
           if (availableRegister(instructionsQ[current].r1)) {
             AddReserv[x].Vj = Registers[r].V;
           } else {
             AddReserv[x].Qj = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].r2.substring(1), 10);
+          r = parseFloat(instructionsQ[current].r2.substring(1), 10);
           if (availableRegister(instructionsQ[current].r2)) {
             AddReserv[x].Vk = Registers[r].V;
           } else {
             AddReserv[x].Qk = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].dest.substring(1), 10); //which index
+          r = parseFloat(instructionsQ[current].dest.substring(1), 10); //which index
           Registers[r].Q = AddReserv[x].tag; //access register -> .Q empty string
           Registers[r].V = ""; // & .V value of memory
           instructionsQ[current].reserIndex = x;
@@ -241,19 +242,19 @@ function issue() {
           console.log("x " + x);
           MulReserv[x].Busy = 1;
           MulReserv[x].oper = instructionsQ[current].op;
-          var r = parseInt(instructionsQ[current].r1.substring(1), 10);
+          var r = parseFloat(instructionsQ[current].r1.substring(1), 10);
           if (availableRegister(instructionsQ[current].r1)) {
             MulReserv[x].Vj = Registers[r].V;
           } else {
             MulReserv[x].Qj = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].r2.substring(1), 10);
+          r = parseFloat(instructionsQ[current].r2.substring(1), 10);
           if (availableRegister(instructionsQ[current].r2)) {
             MulReserv[x].Vk = Registers[r].V;
           } else {
             MulReserv[x].Qk = Registers[r].Q;
           }
-          r = parseInt(instructionsQ[current].dest.substring(1), 10);
+          r = parseFloat(instructionsQ[current].dest.substring(1), 10);
           Registers[r].Q = MulReserv[x].tag;
           Registers[r].V = "";
           instructionsQ[current].reserIndex = x;
@@ -267,25 +268,27 @@ function issue() {
 // Add F3 F0 F2
 function execute() {
   for (var i = 0; i < current; i++) {
-    if (parseInt(instructionsQ[i].issue) != parseInt(clkCycle)) {
+    if (parseFloat(instructionsQ[i].issue) != parseFloat(clkCycle)) {
       var index = instructionsQ[i].reserIndex;
-      if (parseInt(instructionsQ[i].time) == clkCycle)
+      if (parseFloat(instructionsQ[i].time) == clkCycle)
         instructionsQ[i].exec += " : " + clkCycle;
       switch (instructionsQ[i].op) {
         case "LD":
           if (instructionsQ[i].exec == 0) {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.LDet) - 1;
+              parseFloat(clkCycle) + parseFloat(executionTimes.LDet) - 1;
             instructionsQ[i].result = memory[instructionsQ[i].r1];
           }
           break;
+          
         case "SD":
           if (SDReserv[index].V != "" && instructionsQ[i].exec == 0) {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.SDet) - 1;
-            memory[SDReserv[index].Address] = parseInt(SDReserv[index].V, 10);
+              parseFloat(clkCycle) + parseFloat(executionTimes.SDet) - 1;
+     
+            instructionsQ[i].result = parseFloat(SDReserv[index].V, 10);
           }
           break;
         case "ADD":
@@ -297,10 +300,10 @@ function execute() {
             instructionsQ[i].exec = clkCycle;
 
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+              parseFloat(clkCycle) + parseFloat(executionTimes.ADDSUBet) - 1;
             instructionsQ[i].result =
-              parseInt(AddReserv[index].Vj + "", 10) +
-              parseInt(AddReserv[index].Vk + "", 10);
+              parseFloat(AddReserv[index].Vj + "", 10) +
+              parseFloat(AddReserv[index].Vk + "", 10);
           }
           break;
         case "SUB":
@@ -312,27 +315,28 @@ function execute() {
             instructionsQ[i].exec = clkCycle;
 
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.ADDSUBet) - 1;
+              parseFloat(clkCycle) + parseFloat(executionTimes.ADDSUBet) - 1;
             instructionsQ[i].result =
-              parseInt(AddReserv[index].Vj + "", 10) -
-              parseInt(AddReserv[index].Vk + "", 10);
+              parseFloat(AddReserv[index].Vj + "", 10) -
+              parseFloat(AddReserv[index].Vk + "", 10);
           }
           break;
         case "MUL":
           if (
             MulReserv[index].Vj != "" &&
             MulReserv[index].Vk != "" &&
-            instructionsQ[i].exec == ""
+            instructionsQ[i].exec == 0
           ) {
             instructionsQ[i].exec = clkCycle;
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.MULet) - 1;
+              parseFloat(clkCycle) + parseFloat(executionTimes.MULet) - 1;
             instructionsQ[i].result =
-              parseInt(MulReserv[index].Vj + "", 10) *
-              parseInt(MulReserv[index].Vk + "", 10);
+              parseFloat(MulReserv[index].Vj + "", 10) *
+              parseFloat(MulReserv[index].Vk + "", 10);
           }
           break;
         case "DIV":
+          console.log("IM HERE");
           if (
             AddReserv[index].Vj != "" &&
             AddReserv[index].Vk != "" &&
@@ -341,10 +345,10 @@ function execute() {
             instructionsQ[i].exec = clkCycle;
 
             instructionsQ[i].time =
-              parseInt(clkCycle) + parseInt(executionTimes.DIVet) - 1;
+              parseFloat(clkCycle) + parseFloat(executionTimes.DIVet) - 1;
             instructionsQ[i].result =
-              parseInt(AddReserv[index].Vj + "", 10) /
-              parseInt(AddReserv[index].Vk + "", 10);
+              parseFloat(AddReserv[index].Vj + "", 10) /
+              parseFloat(AddReserv[index].Vk + "", 10);
           }
           break;
       }
@@ -367,7 +371,7 @@ function writeResult() {
         case "LD":
           var tag = LDReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
-          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          var r = parseFloat(instructionsQ[i].dest.substring(1), 10);
           if (Registers[r].Q == tag || Registers[r].Q == "") {
             Registers[r].Q = "";
             Registers[r].V = instructionsQ[i].result;
@@ -377,6 +381,7 @@ function writeResult() {
           instructionsQ[i].writeRes = clkCycle;
           break;
         case "SD":
+          memory[SDReserv[index].Address] = instructionsQ[i].result;
           SDReserv[index].V = "";
           SDReserv[index].Q = "";
           SDReserv[index].Address = "";
@@ -387,7 +392,7 @@ function writeResult() {
         case "SUB":
           var tag = AddReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
-          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          var r = parseFloat(instructionsQ[i].dest.substring(1), 10);
           if (Registers[r].Q == tag || Registers[r].Q == "") {
             Registers[r].Q = "";
             Registers[r].V = instructionsQ[i].result;
@@ -404,7 +409,7 @@ function writeResult() {
         case "DIV":
           var tag = MulReserv[index].tag;
           searchReservationTables(tag, instructionsQ[i].result);
-          var r = parseInt(instructionsQ[i].dest.substring(1), 10);
+          var r = parseFloat(instructionsQ[i].dest.substring(1), 10);
           if (Registers[r].Q == tag || Registers[r].Q == "") {
             Registers[r].Q = "";
             Registers[r].V = instructionsQ[i].result;
@@ -489,7 +494,7 @@ function SDReservAvailable() {
 }
 
 function availableRegister(register) {
-  var r = parseInt(register.substring(1), 10);
+  var r = parseFloat(register.substring(1), 10);
   if (Registers[r].V !== "") return true;
   return false;
 }
@@ -570,3 +575,5 @@ function reflectOnFront() {
     IQ_front.rows[i].cells[6].innerHTML = instructionsQ[i - 1].writeRes;
   }
 }
+
+
