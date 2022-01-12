@@ -47,6 +47,8 @@ Open Tomasulo.html in the browser, enter the instructions and the execution time
 click “start” to start the simulation.
 Click “next” to increment cycles. 
 
+Memory and its content can be viewed in the browser's console.
+
 ## Team members:
 
 - Hadeer ElHussen
