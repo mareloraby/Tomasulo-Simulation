@@ -3,6 +3,8 @@ The aim of the project is to simulate the tomasulo algorithm for a floating-poin
 instruction pipeline, demonstrating out-of-order execution in the same way it was
 presented in the lecture through a tabulated visualization. 
 
+![Simulation](https://user-images.githubusercontent.com/42250266/149142658-dc77c837-ac59-440c-8a8b-d3bf8cf30107.jpg)
+
 # Implementation
 We use HTML and JS to create our simulator. We started with creating the tables with
 HTML to have our simulator’s frontend ready. Then we represented them in the backend
